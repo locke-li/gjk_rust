@@ -8,6 +8,10 @@ pub struct Float3 {
 }
 
 impl Float3 {
+    pub fn zero() -> Float3 {
+        Float3 {x:0.0, y:0.0, z:0.0}
+    }
+
     pub fn is_zero(&self) -> bool {
         self.x == 0.0 && self.y == 0.0
     }
@@ -82,6 +86,14 @@ impl ops::Sub for Float3 {
 }
 
 impl ops::Neg for Float3 {
+    type Output = Float3;
+
+    fn neg(self) -> Float3 {
+        Float3 {x:-self.x, y:-self.y, z:-self.z}
+    }
+}
+
+impl ops::Neg for &Float3 {
     type Output = Float3;
 
     fn neg(self) -> Float3 {

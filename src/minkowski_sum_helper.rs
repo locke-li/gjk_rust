@@ -2,8 +2,8 @@ use crate::vector::Float3;
 
 pub struct MinkowskiSumPoint<T> {
     pub v: T,
-    pub a: i32,
-    pub b: i32,
+    pub a: usize,
+    pub b: usize,
 }
 
 impl<T> std::cmp::PartialEq for MinkowskiSumPoint<T> {
@@ -13,7 +13,20 @@ impl<T> std::cmp::PartialEq for MinkowskiSumPoint<T> {
 }
 
 pub fn support(polya_:&[Float3], polyb_:&[Float3], d_:&Float3) -> MinkowskiSumPoint<Float3> {
-    
+    let a = support_in(polya_, d_);
+    let b = support_in(polyb_, &-d_);
+    MinkowskiSumPoint {v: polya_[a] - polyb_[b], a:a, b:b}
+}
 
-    MinkowskiSumPoint {v: Float3{x:0.0, y:0.0, z:0.0}, a:0, b:0}
+fn support_in(poly_:&[Float3], d_:&Float3) -> usize {
+    let mut ret = 0;
+    let mut max: f32 = 0.0;
+    for (i, v) in poly_.iter().enumerate() {
+        let c = v.dot(d_);
+        if c > max {
+            max = c;
+            ret = i;
+        }
+    }
+    ret
 }

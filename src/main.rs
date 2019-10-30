@@ -14,4 +14,13 @@ fn main() {
     let r = a.dot(&b);
     println!("a dot b = {}", r);
     println!("a cross b = {:?}", Float3::cross(&a, &b));
+    let (polya, polyb) = read_input("input");
+    match gjk3d::check(&polya, &polyb, &Float3::zero()) {
+        Some((collide, info)) => {}
+        None => {}
+    }
+}
+
+fn read_input(file:&str) -> (Vec<Float3>, Vec<Float3>) {
+
 }
