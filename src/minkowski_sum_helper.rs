@@ -1,5 +1,6 @@
 use crate::vector::Float3;
 
+#[derive(Debug)]
 pub struct MinkowskiSumPoint<T> {
     pub v: T,
     pub a: usize,

@@ -38,8 +38,8 @@ impl Float3 {
     pub fn cross(&self, b:&Float3) -> Float3 {
         Float3 {
             x: self.y * b.z - self.z * b.y,
-            y: self.x * b.z - self.z * b.z,
-            z: self.x * b.y - self.y * b.z,
+            y: self.x * b.z - self.z * b.x,
+            z: self.x * b.y - self.y * b.x,
         }
     }
 
