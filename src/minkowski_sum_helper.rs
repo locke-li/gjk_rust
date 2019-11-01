@@ -16,6 +16,7 @@ impl<T> std::cmp::PartialEq for MinkowskiSumPoint<T> {
 pub fn support(polya_:&[Float3], polyb_:&[Float3], d_:&Float3) -> MinkowskiSumPoint<Float3> {
     let a = support_in(polya_, d_);
     let b = support_in(polyb_, &-d_);
+    println!("dir {:?} support {:?} a {:?} b {:?}", d_, polya_[a] - polyb_[b], polya_[a], polyb_[b]);
     MinkowskiSumPoint {v: polya_[a] - polyb_[b], a:a, b:b}
 }
 
