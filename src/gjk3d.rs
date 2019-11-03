@@ -17,7 +17,7 @@ pub fn check(polya_:&[Float3], polyb_:&[Float3], ab_:&Float3) -> Option<(bool, F
     let mut s3: Point;
     loop {
         s3 = minkowski_sum_helper::support(polya_, polyb_, &d);
-        println!("{:?}\n{:?} {:?} {:?} {:?}\n{}", d, s0.v, s1.v, s2.v, s3.v, s3.v.dot(&d));
+        println!("{}\n{} {} {} {}\n{}", d, s0.v, s1.v, s2.v, s3.v, s3.v.dot(&d));
         if s3.v.dot(&d) < 0.0 { break no_collision(polya_, polyb_, s0, s1, s2, s3, d) }
         let n0 = Float3::triangle_normal(&s0.v, &s1.v, &s3.v);
         let n1 = Float3::triangle_normal(&s2.v, &s0.v, &s3.v);
@@ -25,7 +25,7 @@ pub fn check(polya_:&[Float3], polyb_:&[Float3], ab_:&Float3) -> Option<(bool, F
         let d0 = s3.v.dot(&n0);
         let d1 = s3.v.dot(&n1);
         let d2 = s3.v.dot(&n2);
-        println!("{:?} {:?} {:?} {} {} {}", n0, n1, n2, d0, d1, d2);
+        println!("{} {} {} {} {} {}", n0, n1, n2, d0, d1, d2);
         if d0 >= 0.0 && d1 >= 0.0 && d2 >= 0.0 {
             break epa(polya_, polyb_, s0, s1, s2, s3, d);
         }

@@ -19,7 +19,8 @@ fn main() {
     println!("a cross b = {:?}", Float3::cross(&a, &b));
     match read_input("input") {
         Ok(((poly_a, center_a), (poly_b, center_b))) => match gjk3d::check(&poly_a, &poly_b, &(center_a - center_b)) {
-            Some((collide, info)) => { println!("collide"); }
+            Some((true, info)) => { println!("collide"); }
+            Some((false, info)) => { println!("miss"); }
             None => { println!("error"); }
         },
         Err(s) => println!("{:?}", s),
@@ -37,9 +38,9 @@ enum ParseError {
 fn read_input(path:&str) -> Result<(Polygon, Polygon), ParseError> {
     let file = File::open(path).map_err(ParseError::IO)?;
     let mut iter = io::BufReader::new(file).lines().filter_map(|line| line.ok()).map(|line| parse_from(&line));
-    let a = iter.next().ok_or(ParseError::Length)??;
-    let b = iter.next().ok_or(ParseError::Length)??;
-    Ok((a, b))
+    let a = iter.next().ok_or(ParseError::Length)?;
+    let b = iter.next().ok_or(ParseError::Length)?;
+    Ok((a?, b?))
 }
 
 fn parse_from(line: &str) -> Result<Polygon, ParseError> {
