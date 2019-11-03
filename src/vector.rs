@@ -38,13 +38,16 @@ impl Float3 {
     pub fn cross(&self, b:&Float3) -> Float3 {
         Float3 {
             x: self.y * b.z - self.z * b.y,
-            y: self.x * b.z - self.z * b.x,
+            y: self.z * b.x - self.x * b.z,
             z: self.x * b.y - self.y * b.x,
         }
     }
 
     pub fn triangle_normal(&self, b:&Float3, c:&Float3) -> Float3 {
-        Float3::cross(&(*b - *self), &(*c - *self))
+        let l0 = *b - *self;
+        let l1 = *c - *self;
+        println!("{} {} {} => {} {}", self, b, c, l0, l1);
+        Float3::cross(&l0, &l1)
     }
 
     pub fn triple_cross(&self, b:&Float3, c:&Float3) -> Float3 {
@@ -59,9 +62,13 @@ impl Float3 {
     }
 }
 
-use std::ops;
+impl std::fmt::Display for Float3 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({},{},{})", self.x, self.y, self.z)
+    }
+}
 
-impl ops::Add for Float3 {
+impl std::ops::Add for Float3 {
     type Output = Float3;
 
     fn add(self, rhs_: Float3) -> Float3 {
@@ -73,7 +80,7 @@ impl ops::Add for Float3 {
     }
 }
 
-impl ops::Sub for Float3 {
+impl std::ops::Sub for Float3 {
     type Output = Float3;
 
     fn sub(self, rhs_: Float3) -> Float3 {
@@ -85,7 +92,7 @@ impl ops::Sub for Float3 {
     }
 }
 
-impl ops::Neg for Float3 {
+impl std::ops::Neg for Float3 {
     type Output = Float3;
 
     fn neg(self) -> Float3 {
@@ -93,7 +100,7 @@ impl ops::Neg for Float3 {
     }
 }
 
-impl ops::Neg for &Float3 {
+impl std::ops::Neg for &Float3 {
     type Output = Float3;
 
     fn neg(self) -> Float3 {
