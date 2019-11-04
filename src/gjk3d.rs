@@ -50,6 +50,7 @@ fn no_collision(
     polya_:&[Float3], polyb_:&[Float3], 
     mut s0:Point, mut s1:Point, mut s2:Point, mut s3:Point, mut d:Float3
     ) -> Option<(bool, Float3)> {
+    //TODO
 
     Some((false, Float3::zero()))
 }
@@ -58,6 +59,7 @@ fn epa(
     polya_:&[Float3], polyb_:&[Float3], 
     mut s0:Point, mut s1:Point, mut s2:Point, mut s3:Point, mut d:Float3
     ) -> Option<(bool, Float3)> {
-
+    //TODO
+    
     Some((true, Float3::zero()))
 }
