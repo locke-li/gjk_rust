@@ -1,5 +1,5 @@
 mod vector;
-mod minkowski_sum_helper;
+mod simplex_based_cd_helper;
 mod gjk3d;
 use vector::Float3;
 use std::fs::File;
@@ -13,16 +13,18 @@ fn main() {
     println!("{} {}", a == b, a == a_copy);
     println!("{}", a.sqr_magnitude());
     let c = a + b;
-    println!("{:?}", c);
+    println!("{}", c);
     let r = a.dot(&b);
     println!("a dot b = {}", r);
-    println!("a cross b = {:?}", Float3::cross(&a, &b));
+    println!("a cross b = {}", Float3::cross(&a, &b));
+    let mut frame = simplex_based_cd_helper::Frame3Simplex::<Float3>::new();
     match read_input("input") {
-        Ok(((poly_a, center_a), (poly_b, center_b))) => match gjk3d::check(&poly_a, &poly_b, &(center_a - center_b)) {
-            Some((true, info)) => { println!("collide"); }
-            Some((false, info)) => { println!("miss"); }
-            None => { println!("error"); }
-        },
+        Ok(((poly_a, center_a), (poly_b, center_b))) => 
+            match gjk3d::check(&poly_a, &poly_b, &(center_a - center_b), &mut frame) {
+                Ok(true) => { println!("collide {:?}", frame); }
+                Ok(false) => { println!("miss {:?}", frame); }
+                Err(e) => { println!("error {:?}", e); }
+            },
         Err(s) => println!("{:?}", s),
     }
 }

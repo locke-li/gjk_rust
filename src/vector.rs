@@ -60,12 +60,37 @@ impl Float3 {
         self.y *= f;
         self.z *= f;
     }
+
+    pub fn lerp(&self, b:&Float3, p_:f32, t_:f32) -> Float3 {
+        let f = p_ / t_;
+        let k = 1.0-f;
+        Float3 {
+            x:self.x * k + b.x * f,
+            y:self.y * k + b.y * f,
+            z:self.z * k + b.z * f,
+        }
+    }
+
+    pub fn lerp_clamp(&self, b:&Float3, p_:f32, t_:f32) -> Float3 {
+        let f = p_ / t_;
+        let f = if f < 0.0 { 0.0 } else if f > 1.0 { 1.0 } else { f };
+        let k = 1.0-f;
+        Float3 {
+            x:self.x * k + b.x * f,
+            y:self.y * k + b.y * f,
+            z:self.z * k + b.z * f,
+        }
+    }
 }
 
 impl std::fmt::Display for Float3 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({},{},{})", self.x, self.y, self.z)
     }
+}
+
+impl Default for Float3 {
+    fn default() -> Self { Float3::zero() }
 }
 
 impl std::ops::Add for Float3 {
