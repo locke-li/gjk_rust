@@ -12,7 +12,7 @@ pub enum Error {
 
 // region MinkowskiSumPoint
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MinkowskiSumPoint<T> {
     pub v: T,
     pub a: usize,
@@ -82,7 +82,7 @@ impl<T> Frame3Simplex<T> {
 
 // region EPA2Simplex
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EPA2Simplex<T> {
     pub v0: Point<T>,
     pub v1: Point<T>,
@@ -98,52 +98,49 @@ pub struct EPA2Simplex<T> {
 
 impl EPA2Simplex<Float3> {
     pub fn new(v0_:&Point<Float3>, v1_:&Point<Float3>, v2_:&Point<Float3>) -> EPA2Simplex<Float3> {
-        let n = Float3::triangle_normal(&v0_, &v1_, &v2_);
+        let n = Float3::triangle_normal(&v0_.v, &v1_.v, &v2_.v);
         let e0 = v1_.v - v0_.v;
         let n0 = Float3::cross(&e0, &n);
         let e1 = v2_.v - v1_.v;
         let n1 = Float3::cross(&e1, &n);
         let e2 = v0_.v - v2_.v;
         let n2 = Float3::cross(&e2, &n);
-        let d0 = -n0.dot(v0_.v);
-        let d1 = -n1.dot(v1_.v);
-        let mut d2 = -n2.dot(v2_.v);
-        let mut e: Float3;
+        let mut d0 = -n0.dot(&v0_.v);
+        let mut d1 = -n1.dot(&v1_.v);
+        let mut d2 = -n2.dot(&v2_.v);
+        let e: Float3;
         let mut p: Float3;
-        if d0 >= 0 && !e0.is_zero() {
-            d2 = 0;
+        if d0 >= 0.0 && !e0.is_zero() {
+            d2 = 0.0;
             e = e0;
-            d0 = e.dot(&v0);
+            d0 = e.dot(&v0_.v);
             d1 = e0.sqr_magnitude();
-            e0.scale(d0, d1);
-            p = v0_.v + e0;
+            p = v0_.v + e0.scaled(d0, d1);
         }
-        else if d1 >= 0 && !e1.is_zero() {
-            d2 = 1;
+        else if d1 >= 0.0 && !e1.is_zero() {
+            d2 = 1.0;
             e = e1;
-            d0 = e.dot(&v1);
+            d0 = e.dot(&v1_.v);
             d1 = e1.sqr_magnitude();
-            e1.scale(d0, d1);
-            p = v1_.v + e1;
+            p = v1_.v + e1.scaled(d0, d1);
         }
-        else if d2 >= 0 && !e2.is_zero() {
-            d2 = 2;
+        else if d2 >= 0.0 && !e2.is_zero() {
+            d2 = 2.0;
             e = e2;
-            d0 = e.dot(&v2);
+            d0 = e.dot(&v2_.v);
             d1 = e2.sqr_magnitude();
-            e2.scale(d0, d1);
-            p = v2_.v + e2;
+            p = v2_.v + e2.scaled(d0, d1);
         }
         else {
-            d2 = -1;
+            d2 = -1.0;
             e = e0;
             p = n;
             p.scale(n.dot(&v0_.v), n.sqr_magnitude());
         }
         EPA2Simplex {
-            v0: v0_,
-            v1: v1_,
-            v2: v2_,
+            v0: v0_.clone(),
+            v1: v1_.clone(),
+            v2: v2_.clone(),
             n: n,
             p: p,
             e: e,
@@ -176,24 +173,42 @@ pub fn plane_normal(v0_:&Float3, v1_:&Float3) -> Float3 {
     }
 }
 
-pub fn support(polya_:&[Float3], polyb_:&[Float3], d_:&Float3) -> MinkowskiSumPoint<Float3> {
-    let a = support_in(polya_, d_);
-    let b = support_in(polyb_, &-d_);
-    println!("dir {} support {}", d_, polya_[a] - polyb_[b]);
-    MinkowskiSumPoint {v: polya_[a] - polyb_[b], a:a, b:b}
+pub fn support(polya_:&[Float3], polyb_:&[Float3], d_:&Float3, f_:&mut Frame3Simplex<Float3>) -> MinkowskiSumPoint<Float3> {
+    support_in(polya_, d_, &mut f_.candidate_a);
+    support_in(polyb_, &-d_, &mut f_.candidate_b);
+    let mut min_a = 0;
+    let mut min_b = 0;
+    let mut v = Default::default();
+    let mut min = std::f32::MAX;
+    for a in &f_.candidate_a {
+        for b in &f_.candidate_b {
+            let c = polya_[*a] - polyb_[*b];
+            let n = c.sqr_magnitude();
+            if n < min {
+                min = n;
+                min_a = *a;
+                min_b = *b;
+                v = c;
+            }
+        }
+    }
+    println!("dir {} support {}", d_, v);
+    MinkowskiSumPoint {v:v, a:min_a, b:min_b}
 }
 
-fn support_in(poly_:&[Float3], d_:&Float3) -> usize {
-    let mut ret = 0;
+fn support_in(poly_:&[Float3], d_:&Float3, candidate_:&mut Vec<usize>) {
+    candidate_.clear();
     let mut max: f32 = std::f32::MIN;
     for (i, v) in poly_.iter().enumerate() {
         let c = v.dot(d_);
         if c > max {
             max = c;
-            ret = i;
+            candidate_.clear();
+        }
+        if c >= max {
+            candidate_.push(i);
         }
     }
-    ret
 }
 
 fn better_support_in_candidate(polya_:&[Float3], polyb_:&[Float3], n_:&Float3,
@@ -222,7 +237,7 @@ fn better_support_in_candidate(polya_:&[Float3], polyb_:&[Float3], n_:&Float3,
 }
 
 pub fn calculate_mtv_from_nearest_feature(polya_:&[Float3], polyb_:&[Float3], f_:&mut Frame3Simplex<Float3>, 
-    mut s0:Point<Float3>, mut s1:Point<Float3>, mut s2:Point<Float3>, d:&Float3, result:bool
+    mut s0:Point<Float3>, mut s1:Point<Float3>, mut s2:Point<Float3>, d:&Float3
 ) -> Result<bool, Error> {
     let mut iteration = 0;
     const MAX_ITERATION: i32 = 16;
@@ -236,22 +251,22 @@ pub fn calculate_mtv_from_nearest_feature(polya_:&[Float3], polyb_:&[Float3], f_
         if d0 < 0.0 && d1 < 0.0 && d2 < 0.0 {
             f_.cache(s0, s1, s2);
             f_.mtv_from_face_case(&d, polya_, polyb_);
-            break Ok(result)
+            break Ok(false)
         }
         else if d0 >= 0.0 && !n0.is_zero() && (d0 == 0.0 || !better_support_in_candidate(polya_, polyb_, &n0, &mut s1, &mut s2, f_)) {
             f_.mtv_from_edge_case(&s0, &s1, polya_, polyb_);
             f_.cache(s0, s1, s2);
-            break Ok(result)
+            break Ok(false)
         }
         else if d1 >= 0.0 && !n1.is_zero() && (d1 == 0.0 || !better_support_in_candidate(polya_, polyb_, &n1, &mut s0, &mut s2, f_)) {
             f_.mtv_from_edge_case(&s1, &s2, polya_, polyb_);
             f_.cache(s0, s1, s2);
-            break Ok(result)
+            break Ok(false)
         }
         else if d2 >= 0.0 && !n2.is_zero() && (d2 == 0.0 || !better_support_in_candidate(polya_, polyb_, &n0, &mut s0, &mut s1, f_)) {
             f_.mtv_from_edge_case(&s2, &s0, polya_, polyb_);
             f_.cache(s0, s1, s2);
-            break Ok(result)
+            break Ok(false)
         }
         iteration += 1;
         if iteration >= MAX_ITERATION { break Err(Error::NearestFeatureSearch) }
@@ -262,6 +277,27 @@ impl Frame3Simplex<Float3> {
     fn normalize(&mut self) {
         self.min_dist = self.mtv.magnitude();
         if self.min_dist > 0.0 { self.mtv.scale(1.0, self.min_dist); }
+    }
+
+    pub fn mtv_from_epa(&mut self, e_:&EPA2Simplex<Float3>, polya_:&[Float3], polyb_:&[Float3]) {
+        self.s0 = e_.v0.clone();
+        self.s1 = e_.v1.clone();
+        self.s2 = e_.v2.clone();
+        match e_.d2 as i32 {
+            0 => self.mtv_from_edge_case_precomputed(polya_, polyb_, &e_.v0, &e_.v1, e_.d0, e_.d1, &e_.n),
+            1 => self.mtv_from_edge_case_precomputed(polya_, polyb_, &e_.v1, &e_.v2, e_.d0, e_.d1, &e_.n),
+            2 => self.mtv_from_edge_case_precomputed(polya_, polyb_, &e_.v2, &e_.v0, e_.d0, e_.d1, &e_.n),
+            _ => self.mtv_from_face_case(&e_.p, polya_, polyb_),
+        }
+    }
+
+    fn mtv_from_edge_case_precomputed(&mut self, polya_:&[Float3], polyb_:&[Float3],
+        s0_:&Point<Float3>, s1_:&Point<Float3>, d0_:f32, d1_:f32, mtv_:&Float3
+    ) {
+        self.closest_a = Float3::lerp_clamp(&polya_[s0_.a], &polya_[s1_.a], d0_, d1_);
+        self.closest_b = Float3::lerp_clamp(&polyb_[s0_.b], &polyb_[s1_.b], d0_, d1_);
+        self.mtv = *mtv_;
+        self.normalize();
     }
 
     fn mtv_from_edge_case(&mut self, s0_:&Point<Float3>, s1_:&Point<Float3>, polya_:&[Float3], polyb_:&[Float3]) {

@@ -61,6 +61,15 @@ impl Float3 {
         self.z *= f;
     }
 
+    pub fn scaled(&self, p_:f32, b_:f32) -> Float3 {
+        let f = p_ / b_;
+        Float3 {
+            x: self.x * f,
+            y: self.y * f,
+            z: self.z * f,
+        }
+    }
+
     pub fn lerp(&self, b:&Float3, p_:f32, t_:f32) -> Float3 {
         let f = p_ / t_;
         let k = 1.0-f;

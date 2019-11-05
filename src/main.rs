@@ -32,7 +32,6 @@ fn main() {
 #[derive(Debug)]
 enum ParseError {
     IO(io::Error),
-    Parse(std::num::ParseFloatError),
     Length,
     Non3Multiple,
 }
