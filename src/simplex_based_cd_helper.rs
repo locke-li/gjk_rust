@@ -236,15 +236,30 @@ fn better_support_in_candidate(polya_:&[Float3], polyb_:&[Float3], n_:&Float3,
     max > 0.0
 }
 
+fn print_candidate_permutation(polya_:&[Float3], polyb_:&[Float3], candidate_a:&[usize], candidate_b:&[usize]) {
+    println!("candidate:");
+    let mut distinct = Vec::new();
+    for a in candidate_a.iter() {
+        for b in candidate_b.iter() {
+            let v = polya_[*a] - polyb_[*b];
+            if distinct.contains(&v) { continue; }
+            distinct.push(v);
+            print!("{} ", v);
+        }
+    }
+    println!();
+}
+
 pub fn calculate_mtv_from_nearest_feature(polya_:&[Float3], polyb_:&[Float3], f_:&mut Frame3Simplex<Float3>, 
     mut s0:Point<Float3>, mut s1:Point<Float3>, mut s2:Point<Float3>, d:&Float3
 ) -> Result<bool, Error> {
     let mut iteration = 0;
     const MAX_ITERATION: i32 = 16;
+    //print_candidate_permutation(polya_, polyb_, &f_.candidate_a, &f_.candidate_b);
     loop {
-        let n0 = d.cross(&(s1.v-s0.v));
-        let n1 = d.cross(&(s2.v-s1.v));
-        let n2 = d.cross(&(s0.v-s2.v));
+        let n0 = (s1.v-s0.v).cross(d);
+        let n1 = (s2.v-s1.v).cross(d);
+        let n2 = (s0.v-s2.v).cross(d);
         let d0 = -n0.dot(&s0.v);
         let d1 = -n1.dot(&s1.v);
         let d2 = -n2.dot(&s2.v);
@@ -263,11 +278,12 @@ pub fn calculate_mtv_from_nearest_feature(polya_:&[Float3], polyb_:&[Float3], f_
             f_.cache(s0, s1, s2);
             break Ok(false)
         }
-        else if d2 >= 0.0 && !n2.is_zero() && (d2 == 0.0 || !better_support_in_candidate(polya_, polyb_, &n0, &mut s0, &mut s1, f_)) {
+        else if d2 >= 0.0 && !n2.is_zero() && (d2 == 0.0 || !better_support_in_candidate(polya_, polyb_, &n2, &mut s0, &mut s1, f_)) {
             f_.mtv_from_edge_case(&s2, &s0, polya_, polyb_);
             f_.cache(s0, s1, s2);
             break Ok(false)
         }
+        //println!("dot {} {} {} {} {} {}", d0, d1, d2, s0, s1, s2);
         iteration += 1;
         if iteration >= MAX_ITERATION { break Err(Error::NearestFeatureSearch) }
     }

@@ -23,7 +23,9 @@ pub fn check(polya_:&[Float3], polyb_:&[Float3], ab_:&Float3, f_:&mut Frame) -> 
     loop {
         s3 = support(polya_, polyb_, &d, f_);
         println!("{}\n{} {} {} {}\n{}", d, s0, s1, s2, s3, s3.v.dot(&d));
-        if s3.v.dot(&d) < 0.0 { break no_collision(polya_, polyb_, f_, s0, s1, s2, s3, d) }
+        if s3.v.dot(&d) < 0.0 {
+            break no_collision(polya_, polyb_, f_, s0, s1, s2, s3, d)
+        }
         let n0 = Float3::triangle_normal(&s0.v, &s1.v, &s3.v);
         let n1 = Float3::triangle_normal(&s2.v, &s0.v, &s3.v);
         let n2 = Float3::triangle_normal(&s1.v, &s2.v, &s3.v);
