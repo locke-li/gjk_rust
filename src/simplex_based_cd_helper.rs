@@ -236,18 +236,20 @@ fn better_support_in_candidate(polya_:&[Float3], polyb_:&[Float3], n_:&Float3,
     max > 0.0
 }
 
-fn print_candidate_permutation(polya_:&[Float3], polyb_:&[Float3], candidate_a:&[usize], candidate_b:&[usize]) {
-    println!("candidate:");
-    let mut distinct = Vec::new();
-    for a in candidate_a.iter() {
-        for b in candidate_b.iter() {
-            let v = polya_[*a] - polyb_[*b];
-            if distinct.contains(&v) { continue; }
-            distinct.push(v);
-            print!("{} ", v);
+macro_rules! print_candidate_permutation {
+    ($polya_:expr, $polyb_:expr, $candidate_a:expr, $candidate_b:expr) => {
+        println!("candidate:");
+        let mut distinct = Vec::new();
+        for a in $candidate_a.iter() {
+            for b in $candidate_b.iter() {
+                let v = $polya_[*a] - $polyb_[*b];
+                if distinct.contains(&v) { continue; }
+                distinct.push(v);
+                print!("{} ", v);
+            }
         }
+        println!();
     }
-    println!();
 }
 
 pub fn calculate_mtv_from_nearest_feature(polya_:&[Float3], polyb_:&[Float3], f_:&mut Frame3Simplex<Float3>, 
@@ -255,7 +257,7 @@ pub fn calculate_mtv_from_nearest_feature(polya_:&[Float3], polyb_:&[Float3], f_
 ) -> Result<bool, Error> {
     let mut iteration = 0;
     const MAX_ITERATION: i32 = 16;
-    //print_candidate_permutation(polya_, polyb_, &f_.candidate_a, &f_.candidate_b);
+    print_candidate_permutation!(polya_, polyb_, f_.candidate_a, f_.candidate_b);
     loop {
         let n0 = (s1.v-s0.v).cross(d);
         let n1 = (s2.v-s1.v).cross(d);
