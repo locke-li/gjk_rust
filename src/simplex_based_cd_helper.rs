@@ -255,6 +255,7 @@ macro_rules! print_candidate_permutation {
 pub fn calculate_mtv_from_nearest_feature(polya_:&[Float3], polyb_:&[Float3], f_:&mut Frame3Simplex<Float3>, 
     mut s0:Point<Float3>, mut s1:Point<Float3>, mut s2:Point<Float3>, d:&Float3
 ) -> Result<bool, Error> {
+    println!("nearest feature");
     let mut iteration = 0;
     const MAX_ITERATION: i32 = 16;
     print_candidate_permutation!(polya_, polyb_, f_.candidate_a, f_.candidate_b);
@@ -265,6 +266,7 @@ pub fn calculate_mtv_from_nearest_feature(polya_:&[Float3], polyb_:&[Float3], f_
         let d0 = -n0.dot(&s0.v);
         let d1 = -n1.dot(&s1.v);
         let d2 = -n2.dot(&s2.v);
+        println!("{} {} {}", d0, d1, d2);
         if d0 < 0.0 && d1 < 0.0 && d2 < 0.0 {
             f_.cache(s0, s1, s2);
             f_.mtv_from_face_case(&d, polya_, polyb_);
@@ -319,7 +321,7 @@ impl Frame3Simplex<Float3> {
     }
 
     fn mtv_from_edge_case(&mut self, s0_:&Point<Float3>, s1_:&Point<Float3>, polya_:&[Float3], polyb_:&[Float3]) {
-        let e = s1_.v - s0_.v;
+        let e = s0_.v - s1_.v;
         let d0 = s0_.v.dot(&e);
         let d1 = e.sqr_magnitude();
         self.closest_a = Float3::lerp_clamp(&polya_[s0_.a], &polya_[s1_.a], d0, d1);

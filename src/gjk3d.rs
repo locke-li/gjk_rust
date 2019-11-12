@@ -57,6 +57,7 @@ fn no_collision(
     polya_:&[Float3], polyb_:&[Float3], f_:&mut Frame,
     mut s0:Point, mut s1:Point, mut s2:Point, mut s3:Point, mut d:Float3
 ) -> Result<bool, Error> {
+    println!("nearest simplex");
     let mut iteration = 0;
     while d.dot(&(s3.v - s0.v)) > 0.0 {
         let n0 = Float3::triangle_normal(&s0.v, &s1.v, &s3.v);
@@ -71,6 +72,7 @@ fn no_collision(
         let d0 = -(d0 * d0) / n0.sqr_magnitude();
         let d1 = -(d1 * d1) / n1.sqr_magnitude();
         let d2 = -(d2 * d2) / n2.sqr_magnitude();
+        println!("{} {} {}", d0, d1, d2);
         if d0 <= d1 && d0 <= d2 {
             s2 = s3;
         }
