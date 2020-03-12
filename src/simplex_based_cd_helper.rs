@@ -162,9 +162,9 @@ pub fn plane_normal(v0_:&Float3, v1_:&Float3) -> Float3 {
         let z = v0_.z.abs();
         Float3::triple_cross(
             v0_,
-            &if x < y && x < z { Float3 {x:1.0,y:0.0,z:0.0} } else
-            if y < x && y < z { Float3 {x:0.0,y:1.0,z:0.0} } else
-            { Float3 {x:0.0,y:0.0,z:1.0} },
+            &if x < y && x < z { Float3 {x:1.0,y:0.0,z:0.0} }
+            else if y < x && y < z { Float3 {x:0.0,y:1.0,z:0.0} }
+            else { Float3 {x:0.0,y:0.0,z:1.0} },
             v0_,
         )
     }

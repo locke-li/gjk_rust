@@ -21,9 +21,9 @@ fn main() {
     match read_input("input") {
         Ok(((poly_a, center_a), (poly_b, center_b))) => 
             match gjk3d::check(&poly_a, &poly_b, &(center_a - center_b), &mut frame) {
-                Ok(true) => { println!("collide {:?}", frame); }
-                Ok(false) => { println!("miss {:?}", frame); }
-                Err(e) => { println!("error {:?}", e); }
+                Ok(true) => { println!("collide\n{:?}", frame); }
+                Ok(false) => { println!("miss\n{:?}", frame); }
+                Err(e) => { println!("error\n{:?}", e); }
             },
         Err(s) => println!("{:?}", s),
     }
@@ -47,12 +47,14 @@ fn read_input(path:&str) -> Result<(Polygon, Polygon), ParseError> {
 fn parse_from(line: &str) -> Option<Polygon> {
     let mut iter = line.split(|c| c == ',' || c == ' ').filter_map(|s| s.parse::<f32>().ok());
     let mut ret:Vec<Float3> = Vec::new();
+    //root/origin position
     let pos_x = iter.next()?;
     let pos_y = iter.next()?;
     let pos_z = iter.next()?;
     let mut center_x = 0.0;
     let mut center_y = 0.0;
     let mut center_z = 0.0;
+    //x component of the first input vertex, at least one point is required
     let mut x = iter.next()?;
     loop {
         let y = iter.next()?;
@@ -61,6 +63,7 @@ fn parse_from(line: &str) -> Option<Polygon> {
         center_y += y;
         center_z += z;
         ret.push(Float3{x:x + pos_x, y:y + pos_y, z:z + pos_z});
+        //next x
         match iter.next() {
             Some(v) => x = v,
             None => break,
