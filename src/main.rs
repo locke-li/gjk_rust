@@ -38,10 +38,11 @@ fn vector_test() {
     let a = Float3 {x:1.0, y:1.0, z:1.0};
     let b = Float3 {x:2.0, y:3.0, z:4.0};
     let a_copy = Float3 {x:1.0, y:1.0, z:1.0};
-    println!("{} {}", a == b, a == a_copy);
-    println!("{}", a.sqr_magnitude());
+    assert_ne!(a, b);
+    assert_eq!(a, a_copy);
+    assert_eq!(a.sqr_magnitude(), 3.0);
     let c = a + b;
-    println!("{}", c);
+    assert!(c.x == 3.0 && c.y == 4.0 && c.z == 5.0);
     let r = a.dot(&b);
     println!("a dot b = {}", r);
     println!("a cross b = {}", Float3::cross(&a, &b));
